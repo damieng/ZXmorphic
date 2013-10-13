@@ -1,5 +1,4 @@
-﻿<#@ template language="C#v3.5"#>
-using System;
+﻿using System;
 
 using Morphic.Core.Bus;
 using Morphic.Core.Primitive;
