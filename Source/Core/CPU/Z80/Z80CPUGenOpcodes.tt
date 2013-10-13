@@ -1,0 +1,85 @@
+﻿<#@ template language="C#v3.5"#>
+using System;
+
+using Morphic.Core.Bus;
+using Morphic.Core.Primitive;
+
+namespace Morphic.Core.Processor.Z80
+{
+	public partial class Z80CPU
+	{
+		protected void InitializeGeneratedOpcodeTables()
+		{
+			// 8-bit register operations
+<#
+string[] shift = { "RLC", "RRC", "RL", "RR", "SLA", "SRA", "SLL", "SRL" };
+string[] math = { "ADD", "ADC", "SUB", "SBC", "AND", "XOR", "OR", "CP" };
+
+string[] r = { "B","C","D","E","H","L","(HL)","A" };
+string[] rr = { "B","C","D","E","H","L","xHL","A" };
+string[] rx = { "B","C","D","E","rHL.High","rHL.Low","xHL","A" };
+for(int i=0;i<r.Length;i++) { #>
+			op[<#=Hex(4 + (i << 3))#>] = new Op("INC <#=r[i]#>", delegate { <#=rr[i]#> = INC(<#=rr[i]#>); });
+			op[<#=Hex(5 + (i << 3))#>] = new Op("DEC <#=r[i]#>", delegate { <#=rr[i]#> = DEC(<#=rr[i]#>); });
+			op[<#=Hex(6 + (i << 3))#>] = new Op("LD <#=r[i]#>,n", delegate { <#=rr[i]#> = n; });
+			opED[<#=Hex(64 + (i << 3))#>] = new Op("IN <#=r[i]#>,(C)", delegate { <#=rr[i]#> = io.ReadByte(C); });
+			opED[<#=Hex(65 + (i << 3))#>] = new Op("OUT (C),<#=r[i]#>", delegate { OUT(C, <#=rr[i]#>); });
+<#		for(int i2=0;i2<r.Length;i2++) {
+			var rs = (r[i2] == "(HL)") ? rx[i] : rr[i]; #>
+			op[<#=Hex(64 + (i << 3) + i2)#>] = new Op("LD <#=r[i]#>,<#=r[i2]#>", delegate { <#=rs#> = <#=rr[i2]#>; });
+<#		}#>
+			op[<#=Hex(120 + i)#>] = new Op("LD A,<#=r[i]#>", delegate { A = <#=rr[i]#>; });
+<#	for(int bits=0;bits<8;bits++) {#>
+			opCB[<#=Hex(64 + (bits << 3) + i)#>] = new Op("BIT <#=bits#>,<#=r[i]#>", delegate { BIT(<#=bits#>, <#=rr[i]#>); });
+			opCB[<#=Hex(128 + (bits << 3) + i)#>] = new Op("RES <#=bits#>,<#=r[i]#>", delegate { <#=rr[i]#> = RES(<#=bits#>, <#=rr[i]#>); });
+			opCB[<#=Hex(192 + (bits << 3) + i)#>] = new Op("SET <#=bits#>,<#=r[i]#>", delegate { <#=rr[i]#> = SET(<#=bits#>, <#=rr[i]#>); });
+<#	}
+	for(int i2=0;i2<shift.Length;i2++) {
+#>			opCB[<#=Hex(i2*8 + i)#>] = new Op("<#=shift[i2]#> <#=r[i]#>", delegate { <#=rr[i]#> = <#=shift[i2]#>(<#=rr[i]#>); });
+<#	}
+	for(int i2=0;i2<math.Length;i2++) { #>
+			op[<#=Hex(128 + (i2 * 8) + i)#>] = new Op("<#=math[i2]#> <#=r[i]#>", delegate { <#=math[i2]#>(<#=rr[i]#>); });
+<#	}
+}#>
+		
+			// 16-bit register operations
+<# string[] dd = { "BC", "DE", "HL", "SP" };
+for(int i=0;i<dd.Length;i++) {
+	string dr = dd[i]; #>
+			op[<#=Hex(1 + (i << 4))#>] = new Op("LD <#=dr#>,nn", delegate { <#=dr#> = nn; });
+			op[<#=Hex(3 + (i << 4))#>] = new Op("INC <#=dr#>", delegate { <#=dr#> = INC(<#=dr#>); });
+			op[<#=Hex(9 + (i << 4))#>] = new Op("ADD HL,<#=dr#>", delegate { HL = ADD(HL, <#=dr#>); });
+			op[<#=Hex(11 + (i << 4))#>] = new Op("DEC <#=dr#>", delegate { <#=dr#> = DEC(<#=dr#>); });
+			opED[<#=Hex(66 + (i << 4))#>] = new Op("SBC HL,<#=dr#>", delegate { HL = SBC(HL, <#=dr#>); });
+			opED[<#=Hex(74 + (i << 4))#>] = new Op("ADC HL,<#=dr#>", delegate { HL = ADC(HL, <#=dr#>); });
+			opED[<#=Hex(0x4B + (i << 4))#>] = new Op("LD <#=dr#>,(nn)", delegate { <#=dr#> = Mem16(nn); });
+			opED[<#=Hex(0x43 + (i << 4))#>] = new Op("LD (nn),<#=dr#>", delegate { Mem(nn, <#=dr#>); });
+<#}#>
+
+			// Restart operations
+<# for(int i=0;i<8;i++) {
+	string ra = (i*8).ToString("x2"); #>
+			op[<#=Hex(199 + (i << 3))#>] = new Op("RST <#=ra#>H", delegate { RST(0x<#=ra#>); });
+<# } #>
+			
+			// Conditional flow operations
+<# string[] cc = { "NZ", "Z", "NC", "C", "PO", "PE", "P", "M" };
+for(int i=0;i<cc.Length;i++) { #>
+			op[<#=Hex(192 + (i << 3))#>] = new Op("RET <#=cc[i]#>", delegate { RET(Test<#=cc[i]#>); });
+			op[<#=Hex(194 + (i << 3))#>] = new Op("JP <#=cc[i]#>,nn", delegate { JP(Test<#=cc[i]#>, nn); });
+			op[<#=Hex(196 + (i << 3))#>] = new Op("CALL <#=cc[i]#>,nn", delegate { CALL(Test<#=cc[i]#>, nn); });
+<#	if (i<4) { #>
+			op[<#=Hex(32 + (i << 3))#>] = new Op("JR <#=cc[i]#>,e", delegate { JR(Test<#=cc[i]#>, GetE()); });
+<#	}
+} #>
+			
+			// Stack operations
+<# string[] qq = { "BC", "DE", "HL", "AF" };
+for(int i=0;i<qq.Length;i++) {
+	string qr = qq[i]; #>
+			op[<#=Hex(193 + (i << 4))#>] = new Op("POP <#=qr#>", delegate { <#=qr#> = POP(); });
+			op[<#=Hex(197 + (i << 4))#>] = new Op("PUSH <#=qr#>", delegate { PUSH(<#=qr#>); });
+<# } #>
+		}
+	}
+}<#+ public static string Hex(int value) { return String.Format("0x{0:x2}",value); } #>

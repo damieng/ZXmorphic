@@ -1,0 +1,14 @@
+1287 = Wrong opcode - FD CB 01 CE should be SET 1, (IY+$01)
+1276 = S5H3N???
+
+98
+
+32t's per loop
+
+
+35425
+
+
+49152 loops = 1572864 states
+
+LD I,A	4 T-States, should be 5
