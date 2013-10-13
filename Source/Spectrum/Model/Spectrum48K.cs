@@ -2,7 +2,6 @@
 
 using System;
 using System.IO;
-using Microsoft.Xna.Framework.Graphics;
 
 using Morphic.Core.Memory;
 using Morphic.Core.Processor.Z80;
