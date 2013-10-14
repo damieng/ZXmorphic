@@ -15,6 +15,8 @@ namespace Test.Forms
             InitializeComponent();
             machine = new Spectrum48K();
 
+            machine.Cpu.Breakpoints.Add(0x0dc9, null);
+
             Program.EmulationThread = new Thread(machine.Run) { Name = "Emulation" };
         }
 

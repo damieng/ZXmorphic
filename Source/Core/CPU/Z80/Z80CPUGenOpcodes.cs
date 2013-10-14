@@ -1,9 +1,4 @@
-﻿using System;
-
-using Morphic.Core.Bus;
-using Morphic.Core.Primitive;
-
-namespace Morphic.Core.CPU.Z80
+﻿namespace Morphic.Core.CPU.Z80
 {
 	public partial class Z80CPU
 	{
@@ -336,7 +331,6 @@ namespace Morphic.Core.CPU.Z80
 			op[0xbd] = new Op("CP L", delegate { CP(L); });
 			op[0x34] = new Op("INC (HL)", delegate { xHL = INC(xHL); });
 			op[0x35] = new Op("DEC (HL)", delegate { xHL = DEC(xHL); });
-			op[0x36] = new Op("LD (HL),n", delegate { xHL = n; });
 			opED[0x70] = new Op("IN (HL),(C)", delegate { xHL = io.ReadByte(C); });
 			opED[0x71] = new Op("OUT (C),(HL)", delegate { OUT(C, xHL); });
 			op[0x70] = new Op("LD (HL),B", delegate { xHL = B; });

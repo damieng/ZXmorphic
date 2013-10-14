@@ -50,7 +50,7 @@ namespace Morphic.Core.CPU.Z80
             public Op(string name)
             {
                 Name = name;
-                call = delegate { };
+                call = delegate { throw new NotImplementedException(name); };
             }
 
             public Op(string name, Opcall call)
@@ -392,6 +392,16 @@ namespace Morphic.Core.CPU.Z80
             Reset();
         }
 
+        private void SetFlags(Byte flags)
+        {
+            F |= flags;
+        }
+
+        private void ClearFlags(Byte flags)
+        {
+            F = (Byte)(F & ~flags);
+        }
+
         private void InitializeManualOpcodeTables()
         {
             // IX and IY prefixing
@@ -407,6 +417,19 @@ namespace Morphic.Core.CPU.Z80
             op[0x02] = new Op("LD (BC),A", delegate { Mem(BC, A); });
             op[0x12] = new Op("LD (DE),A", delegate { Mem(DE, A); });
             op[0x32] = new Op("LD (nn),A", delegate { Mem(nn, A); });
+
+            op[0x36] = new Op("LD (HL),n", delegate
+            {
+                var offset = 0;
+                if (indexerRegister != IndexerRegister.BasicHL)
+                {
+                    indexerOffset = (sbyte)Mem8(PC);
+                    PC.Inc();
+                    xHL = Mem8(PC);
+                }
+
+                xHL = n;
+            });
 
             // Load 8-bit accumulator <-> special register
             opED[0x47] = new Op("LD I,A", delegate
@@ -530,7 +553,7 @@ namespace Morphic.Core.CPU.Z80
             });
 
             // CPU control
-            op[0x00] = new Op("NOP");
+            op[0x00] = new Op("NOP", delegate { });
             op[0x76] = new Op("HALT");
             op[0x27] = new Op("DAA");
             op[0x2F] = new Op("CPL", delegate { A ^= Byte.MaxValue; });
@@ -551,9 +574,39 @@ namespace Morphic.Core.CPU.Z80
 
             // Rotate & shift
             op[0x07] = new Op("RLCA");
-            op[0x0F] = new Op("RRCA");
+            op[0x0F] = new Op("RRCA", delegate
+                {
+                    var carry = (A & 0x1) != 0;
+                    A = (Byte) (A >> 1);
+                    if (carry)
+                    {
+                        SetFlags(FlagMask.C);
+                        F |= FlagMask.C;
+                        A = (Byte) (A | 0x80);
+                    }
+                    else
+                        ClearFlags(FlagMask.C);
+
+                    ClearFlags(FlagMask.H);
+                    ClearFlags(FlagMask.N);
+                });
             op[0x17] = new Op("RLA");
-            op[0x1F] = new Op("RRA");
+            op[0x1F] = new Op("RRA", delegate
+            {
+                var carry = (F & FlagMask.C) != 0;
+                A = (Byte)(A >> 1);
+                if ((A & 0xF0) != 0)
+                    SetFlags(FlagMask.C);
+                else
+                    ClearFlags(FlagMask.C);
+                if (carry)
+                    A |= (Byte)(A & 0xF0);
+                else
+                    A = (Byte)(A & ~0xF0);
+
+                ClearFlags(FlagMask.H);
+                ClearFlags(FlagMask.N);
+            });
             op[0x67] = new Op("RRD");
             op[0x6F] = new Op("RLD");
 
@@ -582,7 +635,7 @@ namespace Morphic.Core.CPU.Z80
             });
             op[0x18] = new Op("JR e", delegate { JR(true, GetE()); });
             op[0xC3] = new Op("JP nn", delegate { JP(true, nn); });
-            op[0xE9] = new Op("JP (HL)", delegate { JP(true, Mem16(rHL)); });
+            op[0xE9] = new Op("JP (HL)", delegate { JP(true, rHL); });
 
             // Call & return
             op[0xC9] = new Op("RET", delegate { RET(true); });
@@ -647,7 +700,7 @@ namespace Morphic.Core.CPU.Z80
             {
                 if (shouldStop)
                     StopAfterAddress = null;
-                Thread.CurrentThread.Suspend();
+                //Thread.CurrentThread.Suspend();
             }
 
             tStates += 4;

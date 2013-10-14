@@ -39,9 +39,13 @@ namespace Test.Forms
             this.HexTab = new System.Windows.Forms.TabPage();
             this.HexTextBox = new System.Windows.Forms.RichTextBox();
             this.RefreshTimer = new System.Windows.Forms.Timer(this.components);
+            this.StackTab = new System.Windows.Forms.TabPage();
+            this.StackListView = new System.Windows.Forms.ListView();
+            this.AddressColumn = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             ((System.ComponentModel.ISupportInitialize)(this.AddressNumeric)).BeginInit();
             this.Tabs.SuspendLayout();
             this.HexTab.SuspendLayout();
+            this.StackTab.SuspendLayout();
             this.SuspendLayout();
             // 
             // BankCombo
@@ -121,10 +125,11 @@ namespace Test.Forms
             // 
             // Tabs
             // 
-            this.Tabs.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.Tabs.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.Tabs.Controls.Add(this.HexTab);
+            this.Tabs.Controls.Add(this.StackTab);
             this.Tabs.Location = new System.Drawing.Point(15, 52);
             this.Tabs.Name = "Tabs";
             this.Tabs.SelectedIndex = 0;
@@ -159,6 +164,37 @@ namespace Test.Forms
             // 
             this.RefreshTimer.Tick += new System.EventHandler(this.RefreshTimer_Tick);
             // 
+            // StackTab
+            // 
+            this.StackTab.Controls.Add(this.StackListView);
+            this.StackTab.Location = new System.Drawing.Point(4, 22);
+            this.StackTab.Name = "StackTab";
+            this.StackTab.Padding = new System.Windows.Forms.Padding(3);
+            this.StackTab.Size = new System.Drawing.Size(329, 216);
+            this.StackTab.TabIndex = 5;
+            this.StackTab.Text = "Stack";
+            this.StackTab.UseVisualStyleBackColor = true;
+            // 
+            // StackListView
+            // 
+            this.StackListView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.AddressColumn});
+            this.StackListView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.StackListView.FullRowSelect = true;
+            this.StackListView.GridLines = true;
+            this.StackListView.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
+            this.StackListView.Location = new System.Drawing.Point(3, 3);
+            this.StackListView.MultiSelect = false;
+            this.StackListView.Name = "StackListView";
+            this.StackListView.Size = new System.Drawing.Size(323, 210);
+            this.StackListView.TabIndex = 0;
+            this.StackListView.UseCompatibleStateImageBehavior = false;
+            this.StackListView.View = System.Windows.Forms.View.Details;
+            // 
+            // AddressColumn
+            // 
+            this.AddressColumn.Text = "Address";
+            // 
             // MemoryForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -181,6 +217,7 @@ namespace Test.Forms
             ((System.ComponentModel.ISupportInitialize)(this.AddressNumeric)).EndInit();
             this.Tabs.ResumeLayout(false);
             this.HexTab.ResumeLayout(false);
+            this.StackTab.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -199,6 +236,9 @@ namespace Test.Forms
         private System.Windows.Forms.TabPage HexTab;
         private System.Windows.Forms.Timer RefreshTimer;
 		private System.Windows.Forms.RichTextBox HexTextBox;
+        private System.Windows.Forms.TabPage StackTab;
+        private System.Windows.Forms.ListView StackListView;
+        private System.Windows.Forms.ColumnHeader AddressColumn;
 
 	}
 }

@@ -1,9 +1,4 @@
-﻿using System;
-
-using Morphic.Core.Bus;
-using Morphic.Core.Primitive;
-
-namespace Morphic.Core.CPU.Z80
+﻿namespace Morphic.Core.CPU.Z80
 {
 	public partial class Z80CPU
 	{

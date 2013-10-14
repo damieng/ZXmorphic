@@ -1,9 +1,9 @@
-using System;
-using System.Drawing;
-using System.Windows.Forms;
 using Morphic.Core.CPU.Z80;
 using Morphic.Core.Memory;
 using Spectrum.Custom;
+using System;
+using System.Drawing;
+using System.Windows.Forms;
 
 namespace Test.Forms
 {
@@ -47,7 +47,24 @@ namespace Test.Forms
 
         public void RefreshDisplay()
         {
-            DisplayHex();
+            if (Tabs.SelectedTab == HexTab)
+                DisplayHex();
+
+            if (Tabs.SelectedTab == StackTab)
+                DisplayStack();
+        }
+
+        private void DisplayStack()
+        {
+            StackListView.BeginUpdate();
+            StackListView.Items.Clear();
+
+            var address = (uint)(CurrentAddress - 2);
+            int count = 32;
+            while (count-- > 0)
+                StackListView.Items.Add(new ListViewItem(pagedMemory.ReadWord(address += 2).ToString()));
+
+            StackListView.EndUpdate();
         }
 
         private void DisplayHex()
