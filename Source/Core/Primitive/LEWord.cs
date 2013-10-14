@@ -4,29 +4,19 @@ namespace Morphic.Core.Primitive
 {
 	public struct LEWord
 	{
-		#region Instance variables
-
 		public Byte Low, High;
-
-		#endregion
-
-		#region Construction
 
 		public LEWord(Byte low, Byte high)
 		{
-			this.Low = low;
-			this.High = high;
+			Low = low;
+			High = high;
 		}
 
 		public LEWord(UInt16 word)
 		{
-			this.High = (Byte) (word / 256);
-			this.Low = (Byte) (word % 256);
+			High = (Byte) (word / 256);
+			Low = (Byte) (word % 256);
 		}
-
-		#endregion
-
-		#region Methods
 
 		public void IncLow()
 		{
@@ -96,11 +86,7 @@ namespace Morphic.Core.Primitive
 		{
 			return String.Format("{0:X4}", ToUInt16());
 		}
-
-		#endregion
-
-		#region Static methods
-
+	
 		public static implicit operator UInt16(LEWord value)
 		{
 			return value.ToUInt16();
@@ -110,7 +96,5 @@ namespace Morphic.Core.Primitive
 		{
 			return new LEWord(value);
 		}
-
-		#endregion
 	}
 }

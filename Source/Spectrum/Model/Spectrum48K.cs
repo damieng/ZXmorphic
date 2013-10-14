@@ -1,64 +1,41 @@
-#region Imports
-
-using System;
-using System.IO;
-
-using Morphic.Core.Memory;
-using Morphic.Core.Processor.Z80;
-
+using Morphic.Core.CPU.Z80;
 using Spectrum.Custom;
 using Spectrum.Memory;
 
-#endregion
-
 namespace Spectrum.Model
 {
-	public class Spectrum48K
-	{
-		#region Instance variables
+    public class Spectrum48K
+    {
+        public readonly Z80CPU Cpu;
+        public readonly Memory48K Memory;
+        public readonly Spectrum48KULA Ula;
 
-		public Z80CPU cpu;
-		private Spectrum48KULA ula;
-		public Memory48K memory;
+        public Spectrum48K()
+        {
+            Memory = new Memory48K();
+            Ula = new Spectrum48KULA();
+            Cpu = new Z80CPU(Memory, Ula);
 
-		#endregion
+            Reset();
+        }
 
-		#region Construction
+        public void Reset()
+        {
+            Ula.Reset();
+            Memory.Reset();
+            Memory.Load(0, @"ROMs\48.rom");
+            Cpu.Reset();
+        }
 
-		public Spectrum48K()
-		{
-			memory = new Memory48K();
+        public void Run()
+        {
+            while (true)
+                Cpu.Cycle();
+        }
 
-			ula = new Spectrum48KULA();
-			cpu = new Z80CPU(memory, ula);
-
-			Reset();
-		}
-
-		#endregion
-
-		#region Methods
-
-		public void Reset()
-		{
-			memory.Reset();
-			memory.Load(0, @"ROMs\48.rom");
-			//memory.Load(16384, @"c:\temp\test.scr");
-
-			cpu.Reset();
-		}
-
-		public void Run()
-		{
-			while(true)
-				cpu.Cycle();
-		}
-
-		public void Cycle()
-		{
-			cpu.Cycle();
-		}
-
-		#endregion
-	}
+        public void Cycle()
+        {
+            Cpu.Cycle();
+        }
+    }
 }

@@ -1,7 +1,5 @@
 using System;
 
-using Morphic.Core.Primitive;
-
 namespace Morphic.Core.Bus
 {
 	public interface IBus16Bit

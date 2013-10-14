@@ -3,7 +3,7 @@
 using Morphic.Core.Bus;
 using Morphic.Core.Primitive;
 
-namespace Morphic.Core.Processor.Z80
+namespace Morphic.Core.CPU.Z80
 {
 	public partial class Z80CPU
 	{

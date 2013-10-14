@@ -36,7 +36,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="System.Configuration" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
@@ -61,7 +60,6 @@
     <Service Include="{B4F97281-0DBD-4835-9ED8-7DFB966E87FF}" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
     <None Include="CPU\Z80\Z80CPUGenOpcodes.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>Z80CPUGenOpcodes.cs</LastGenOutput>

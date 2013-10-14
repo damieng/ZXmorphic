@@ -1,4 +1,4 @@
-namespace Test
+namespace Test.Forms
 {
 	partial class MainForm
 	{

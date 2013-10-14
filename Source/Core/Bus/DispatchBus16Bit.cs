@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-using Morphic.Core.Bus;
-
-namespace Spectrum.Custom
+namespace Morphic.Core.Bus
 {
 	// TODO
 	// 1. Remove interfaces and allow for delegates directly
@@ -23,37 +21,33 @@ namespace Spectrum.Custom
 
 	public class DispatchBus16Bit : IBus16Bit
 	{
-		public Dictionary<UInt16, IReadBus16Bit> readers = new Dictionary<UInt16, IReadBus16Bit>();
-		public Dictionary<UInt16, IWriterBus16Bit> writers = new Dictionary<UInt16, IWriterBus16Bit>();
-
-		#region I16BitBus IO interface
+		private readonly Dictionary<UInt16, IReadBus16Bit> readers = new Dictionary<UInt16, IReadBus16Bit>();
+		private readonly Dictionary<UInt16, IWriterBus16Bit> writers = new Dictionary<UInt16, IWriterBus16Bit>();
 
 		public Byte ReadByte(UInt16 address)
 		{
-			IReadBus16Bit reader = readers[address];
+			var reader = readers[address];
 			return (reader == null) ? Byte.MinValue : reader.ReadByte(address);
 		}
 
 		public void WriteByte(UInt16 address, Byte data)
 		{
-			IWriterBus16Bit writer = writers[address];
+			var writer = writers[address];
 			if (writer != null)
 				writer.Write(address, data);
 		}
 
 		public UInt16 ReadWord(UInt16 address)
 		{
-			IReadBus16Bit reader = readers[address];
+			var reader = readers[address];
 			return (reader == null) ? UInt16.MinValue : reader.ReadWord(address);
 		}
 
 		public void WriteWord(UInt16 address, UInt16 data)
 		{
-			IWriterBus16Bit writer = writers[address];
+			var writer = writers[address];
 			if (writer != null)
 				writer.Write(address, data);
 		}
-
-		#endregion
 	}
 }

@@ -6,15 +6,9 @@ namespace Morphic.Core.Memory
 {
 	public class PagedMemory
 	{
-		#region Instance variables
-
 		public MemoryPage[] AllPages;
 		public MemoryPage[] CurrentPages;
-		private UInt32 pageSize;
-
-		#endregion
-
-		#region Construction
+		private readonly UInt32 pageSize;
 
 		public PagedMemory(UInt32 totalPageCount, UInt32 pageSize, UInt32 contigPageCount)
 		{
@@ -22,33 +16,29 @@ namespace Morphic.Core.Memory
 			AllPages = new MemoryPage[totalPageCount];
 			CurrentPages = new MemoryPage[contigPageCount];
 
-			for (int idx = 0; idx < totalPageCount; idx++)
+			for (var idx = 0; idx < totalPageCount; idx++)
 				AllPages[idx] = new MemoryPage(pageSize, false);
 
-			for (int idx = 0; idx < contigPageCount; idx++)
+			for (var idx = 0; idx < contigPageCount; idx++)
 				CurrentPages[idx] = AllPages[idx];
-		}
-
-		#endregion
-
-		#region Methods
+		}		
 
 		public void WriteByte(UInt32 address, Byte data, Boolean force)
 		{
-			int page = (int)(address / pageSize);
+			var page = (int)(address / pageSize);
 			if (page >= AllPages.Length)
 				return;
 
-            if ((!AllPages[page].ReadOnly) || (force)) {
-                int pageAddress = (int)(address % pageSize);
-                AllPages[page][pageAddress] = data;
-            }
+		    if ((AllPages[page].ReadOnly) && (!force)) return;
+
+		    var pageAddress = (int)(address % pageSize);
+		    AllPages[page][pageAddress] = data;
 		}
 
 		public Byte ReadByte(UInt32 address)
 		{
-			int page = (int)(address / pageSize);
-			int pageAddress = (int) (address % pageSize);
+			var page = (int)(address / pageSize);
+			var pageAddress = (int) (address % pageSize);
 			return AllPages[page][pageAddress];
 		}
 
@@ -62,7 +52,5 @@ namespace Morphic.Core.Memory
 			WriteByte(address, data.Low, force);
 			WriteByte(address + 1, data.High, force);
         }
-
-		#endregion
 	}
 }

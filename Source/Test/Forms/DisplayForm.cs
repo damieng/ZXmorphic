@@ -1,22 +1,21 @@
 ﻿using System;
 using System.Windows.Forms;
-
 using Spectrum.Custom;
 
-namespace Test
+namespace Test.Forms
 {
     public partial class DisplayForm : Form
     {
-        private SpectrumDisplay display;
+        private readonly SpectrumDisplay display;
 
         public DisplayForm(SpectrumDisplay display)
         {
             this.display = display;
             InitializeComponent();
-            SetFPS(25);
+            SetFps(25);
         }
 
-        public void SetFPS(int fps)
+        public void SetFps(int fps)
         {
             timer.Enabled = (fps != 0);
             if (fps > 0)
