@@ -10,9 +10,9 @@ namespace Morphic.Core.CPU.Z80
     {
         public enum IndexerRegister
         {
-            BasicHL,
-            IndexX,
-            IndexY
+            HL,
+            IX,
+            IY
         }
 
         public enum InstructionSets
@@ -201,9 +201,9 @@ namespace Morphic.Core.CPU.Z80
             {
                 switch (indexerRegister)
                 {
-                    case IndexerRegister.IndexX:
+                    case IndexerRegister.IX:
                         return IX.High;
-                    case IndexerRegister.IndexY:
+                    case IndexerRegister.IY:
                         return IY.High;
                     default:
                         return rHL.High;
@@ -213,10 +213,10 @@ namespace Morphic.Core.CPU.Z80
             {
                 switch (indexerRegister)
                 {
-                    case IndexerRegister.IndexX:
+                    case IndexerRegister.IX:
                         IX.High = value;
                         break;
-                    case IndexerRegister.IndexY:
+                    case IndexerRegister.IY:
                         IY.High = value;
                         break;
                     default:
@@ -232,9 +232,9 @@ namespace Morphic.Core.CPU.Z80
             {
                 switch (indexerRegister)
                 {
-                    case IndexerRegister.IndexX:
+                    case IndexerRegister.IX:
                         return IX.Low;
-                    case IndexerRegister.IndexY:
+                    case IndexerRegister.IY:
                         return IY.Low;
                     default:
                         return rHL.Low;
@@ -244,10 +244,10 @@ namespace Morphic.Core.CPU.Z80
             {
                 switch (indexerRegister)
                 {
-                    case IndexerRegister.IndexX:
+                    case IndexerRegister.IX:
                         IX.Low = value;
                         break;
-                    case IndexerRegister.IndexY:
+                    case IndexerRegister.IY:
                         IY.Low = value;
                         break;
                     default:
@@ -258,32 +258,43 @@ namespace Morphic.Core.CPU.Z80
         }
 
         // Indirect access to HL with necessary offset applied
-        public Byte xHL
+        public Byte HLAddr
         {
             get { return Mem8(HLe); }
-            set { Mem(HLe, value); }
+            set
+            {
+                if (indexerRegister != IndexerRegister.HL)
+                {
+                    indexerOffset = (sbyte)value;
+                    value = n;
+                }
+
+                Mem(HLe, value);
+            }
         }
 
         // Fake HL taking current IX/IY into account with next byte 3 applied
-
         public LEWord HLe
         {
             get
             {
-                if (!indexerOffset.HasValue && indexerRegister != IndexerRegister.BasicHL)
+                if (indexerRegister == IndexerRegister.HL)
+                    return rHL;
+
+                if (!indexerOffset.HasValue)
                     indexerOffset = GetE();
 
                 switch (indexerRegister)
                 {
-                    case IndexerRegister.IndexX:
+                    case IndexerRegister.IX:
                         var addressIX = IX.ToUInt16() + indexerOffset.Value;
                         return new LEWord((UInt16)addressIX);
-                    case IndexerRegister.IndexY:
+                    case IndexerRegister.IY:
                         var addressIY = IY.ToUInt16() + indexerOffset.Value;
                         return new LEWord((UInt16)addressIY);
-                    default:
-                        return rHL;
                 }
+
+                throw new NotSupportedException();
             }
         }
 
@@ -294,9 +305,9 @@ namespace Morphic.Core.CPU.Z80
             {
                 switch (indexerRegister)
                 {
-                    case IndexerRegister.IndexX:
+                    case IndexerRegister.IX:
                         return IX;
-                    case IndexerRegister.IndexY:
+                    case IndexerRegister.IY:
                         return IY;
                     default:
                         return rHL;
@@ -306,10 +317,10 @@ namespace Morphic.Core.CPU.Z80
             {
                 switch (indexerRegister)
                 {
-                    case IndexerRegister.IndexX:
+                    case IndexerRegister.IX:
                         IX = value;
                         break;
-                    case IndexerRegister.IndexY:
+                    case IndexerRegister.IY:
                         IY = value;
                         break;
                     default:
@@ -405,8 +416,8 @@ namespace Morphic.Core.CPU.Z80
         private void InitializeManualOpcodeTables()
         {
             // IX and IY prefixing
-            op[0xDD] = new StateOp("IX", delegate { indexerRegister = IndexerRegister.IndexX; });
-            op[0xFD] = new StateOp("IY", delegate { indexerRegister = IndexerRegister.IndexY; });
+            op[0xDD] = new StateOp("IX", delegate { indexerRegister = IndexerRegister.IX; });
+            op[0xFD] = new StateOp("IY", delegate { indexerRegister = IndexerRegister.IY; });
 
             // Load 8-bit accumulator <- register-address or value-address
             op[0x0A] = new Op("LD A,(BC)", delegate { A = Mem8(BC); });
@@ -421,14 +432,14 @@ namespace Morphic.Core.CPU.Z80
             op[0x36] = new Op("LD (HL),n", delegate
             {
                 var offset = 0;
-                if (indexerRegister != IndexerRegister.BasicHL)
+                if (indexerRegister != IndexerRegister.HL)
                 {
                     indexerOffset = (sbyte)Mem8(PC);
                     PC.Inc();
-                    xHL = Mem8(PC);
+                    HLAddr = Mem8(PC);
                 }
 
-                xHL = n;
+                HLAddr = n;
             });
 
             // Load 8-bit accumulator <-> special register
@@ -577,12 +588,12 @@ namespace Morphic.Core.CPU.Z80
             op[0x0F] = new Op("RRCA", delegate
                 {
                     var carry = (A & 0x1) != 0;
-                    A = (Byte) (A >> 1);
+                    A = (Byte)(A >> 1);
                     if (carry)
                     {
                         SetFlags(FlagMask.C);
                         F |= FlagMask.C;
-                        A = (Byte) (A | 0x80);
+                        A = (Byte)(A | 0x80);
                     }
                     else
                         ClearFlags(FlagMask.C);
@@ -677,9 +688,11 @@ namespace Morphic.Core.CPU.Z80
                     cycleOp = op[opcode];
                     break;
                 case InstructionSets.CB:
-                    if (indexerRegister != IndexerRegister.BasicHL)
-                        indexerOffset = (SByte)opcode;
-                    opcode = n;
+                    if (indexerRegister != IndexerRegister.HL)
+                    {
+                        indexerOffset = (SByte) opcode;
+                        opcode = n;
+                    }
                     cycleOp = (opCB[opcode] ?? op[opcode]);
                     break;
                 case InstructionSets.ED:
@@ -693,7 +706,7 @@ namespace Morphic.Core.CPU.Z80
             if (!(cycleOp is StateOp))
             {
                 instructionSet = InstructionSets.Normal;
-                indexerRegister = IndexerRegister.BasicHL;
+                indexerRegister = IndexerRegister.HL;
                 indexerOffset = null;
             }
             else
@@ -708,7 +721,7 @@ namespace Morphic.Core.CPU.Z80
 
         public void Reset()
         {
-            indexerRegister = IndexerRegister.BasicHL;
+            indexerRegister = IndexerRegister.HL;
             instructionSet = InstructionSets.Normal;
 
             AF = new LEWord();
@@ -895,8 +908,7 @@ namespace Morphic.Core.CPU.Z80
         protected void BIT(int b, Byte m)
         {
             var t = m & (0x01 << b);
-            F = (byte)(FlagMask.H
-                        | (t == 0x80 ? FlagMask.S : 0));
+            F = (byte)(FlagMask.H | (t == 0x80 ? FlagMask.S : 0));
             if (t == 0)
                 F |= FlagMask.Z | FlagMask.V;
             else
@@ -906,12 +918,12 @@ namespace Morphic.Core.CPU.Z80
 
         protected Byte SET(int b, Byte m)
         {
-            return m |= (Byte)(1 << b);
+            return (Byte)(m | (Byte)(1 << b));
         }
 
         protected Byte RES(int b, Byte m)
         {
-            return m &= (Byte)~(1 << b);
+            return (Byte)(m & (Byte)~(1 << b));
         }
 
         private void CPx()

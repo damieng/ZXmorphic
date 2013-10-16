@@ -100,14 +100,14 @@ namespace Morphic.Core.CPU.Z80
             {
                 case 0xDD:
                     manipulateDecoded = input => input.Replace("(HL)", "(IXx)").Replace("HL", "IX");
-                    state.IndexerRegister = Z80CPU.IndexerRegister.IndexX;
+                    state.IndexerRegister = Z80CPU.IndexerRegister.IX;
                     return DecodeOp(state);
                 case 0xFD:
                     manipulateDecoded = input => input.Replace("(HL)", "(IYx)").Replace("HL", "IY");
-                    state.IndexerRegister = Z80CPU.IndexerRegister.IndexY;
+                    state.IndexerRegister = Z80CPU.IndexerRegister.IY;
                     return DecodeOp(state);
                 case 0xCB:
-                    if (state.IndexerRegister != Z80CPU.IndexerRegister.BasicHL)
+                    if (state.IndexerRegister != Z80CPU.IndexerRegister.HL)
                         state.IndexerOffset = (SByte)z80.Memory.ReadByte(state.Address++);
                     return z80.opCB[z80.Memory.ReadByte(state.Address++)];
                 case 0xED:
@@ -137,7 +137,7 @@ namespace Morphic.Core.CPU.Z80
         {
             public UInt16 Address;
             public SByte? IndexerOffset;
-            public Z80CPU.IndexerRegister IndexerRegister = Z80CPU.IndexerRegister.BasicHL;
+            public Z80CPU.IndexerRegister IndexerRegister = Z80CPU.IndexerRegister.HL;
             public Z80CPU.InstructionSets instructionSet = Z80CPU.InstructionSets.Normal;
         }
     }

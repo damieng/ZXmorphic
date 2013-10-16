@@ -10,8 +10,8 @@ string[] shift = { "RLC", "RRC", "RL", "RR", "SLA", "SRA", "SLL", "SRL" };
 string[] math = { "ADD", "ADC", "SUB", "SBC", "AND", "XOR", "OR", "CP" };
 
 string[] r = { "B","C","D","E","H","L","(HL)","A" };
-string[] rr = { "B","C","D","E","H","L","xHL","A" };
-string[] rx = { "B","C","D","E","rHL.High","rHL.Low","xHL","A" };
+string[] rr = { "B","C","D","E","H","L","HLAddr","A" };
+string[] rx = { "B","C","D","E","rHL.High","rHL.Low","HLAddr","A" };
 for(int i=0;i<r.Length;i++) { #>
 			op[<#=Hex(4 + (i << 3))#>] = new Op("INC <#=r[i]#>", delegate { <#=rr[i]#> = INC(<#=rr[i]#>); });
 			op[<#=Hex(5 + (i << 3))#>] = new Op("DEC <#=r[i]#>", delegate { <#=rr[i]#> = DEC(<#=rr[i]#>); });
