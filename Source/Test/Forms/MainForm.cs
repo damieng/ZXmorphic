@@ -84,14 +84,13 @@ namespace Test.Forms
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (Program.EmulationThread != null)
-            {
-                if (Program.EmulationThread.ThreadState == ThreadState.Suspended)
-                    Program.EmulationThread.Resume();
+            if (Program.EmulationThread == null) return;
 
-                if (Program.EmulationThread.ThreadState == ThreadState.Running)
-                    Program.EmulationThread.Abort();
-            }
+            if (Program.EmulationThread.ThreadState == ThreadState.Suspended)
+                Program.EmulationThread.Resume();
+
+            if (Program.EmulationThread.ThreadState == ThreadState.Running)
+                Program.EmulationThread.Abort();
         }
     }
 }

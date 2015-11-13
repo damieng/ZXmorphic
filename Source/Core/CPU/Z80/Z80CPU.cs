@@ -41,7 +41,6 @@ namespace Morphic.Core.CPU.Z80
             Word = 16
         };
 
-        #region Internal classes
 
         public delegate void Opcall();
 
@@ -59,8 +58,8 @@ namespace Morphic.Core.CPU.Z80
                 this.call = call;
             }
 
-            public string Name { get; private set; }
-            private Opcall call { get; set; }
+            public string Name { get; }
+            readonly Opcall call;
 
             public void Call()
             {
@@ -80,10 +79,6 @@ namespace Morphic.Core.CPU.Z80
             {
             }
         }
-
-        #endregion
-
-        #region Instance variables
 
         // Opcode tables
 
@@ -125,22 +120,11 @@ namespace Morphic.Core.CPU.Z80
         public UInt16 tStates;
         public Byte x8;
 
-        public InterruptModes InterruptMode
-        {
-            get { return interruptMode; }
-        }
+        public InterruptModes InterruptMode => interruptMode;
 
-        public InstructionSets InstructionSet
-        {
-            get { return instructionSet; }
-        }
+        public InstructionSets InstructionSet => instructionSet;
 
-        public IndexerRegister IndexerRegisterMode
-        {
-            get { return indexerRegister; }
-        }
-
-        #endregion
+        public IndexerRegister IndexerRegisterMode => indexerRegister;
 
         public struct LastMemory
         {
@@ -149,15 +133,9 @@ namespace Morphic.Core.CPU.Z80
             public MemorySize Size;
         }
 
-        #region Properties
+        SByte? indexerOffset;
 
-        // TODO: This is supremely crap.
-        private SByte? indexerOffset;
-
-        public UInt16 ProgramCounter
-        {
-            get { return (InstructionSet == InstructionSets.Normal) ? PC.ToUInt16() : (UInt16)(PC.ToUInt16() - 1); }
-        }
+        public UInt16 ProgramCounter => (InstructionSet == InstructionSets.Normal) ? PC.ToUInt16() : (UInt16)(PC.ToUInt16() - 1);
 
         public Byte A
         {
@@ -348,49 +326,21 @@ namespace Morphic.Core.CPU.Z80
         }
 
         // Register flag checking
-        public bool TestC
-        {
-            get { return (F & FlagMask.C) != 0; }
-        }
+        public bool TestC => (F & FlagMask.C) != 0;
 
-        public bool TestNC
-        {
-            get { return !TestC; }
-        }
+        public bool TestNC => !TestC;
 
-        public bool TestZ
-        {
-            get { return (F & FlagMask.Z) != 0; }
-        }
+        public bool TestZ => (F & FlagMask.Z) != 0;
 
-        public bool TestNZ
-        {
-            get { return !TestZ; }
-        }
+        public bool TestNZ => !TestZ;
 
-        public bool TestPE
-        {
-            get { return (F & FlagMask.P) != 0; }
-        }
+        public bool TestPE => (F & FlagMask.P) != 0;
 
-        public bool TestPO
-        {
-            get { return !TestPE; }
-        }
+        public bool TestPO => !TestPE;
 
-        public bool TestP
-        {
-            get { return (F & FlagMask.S) != 0; }
-        }
+        public bool TestP => (F & FlagMask.S) != 0;
 
-        public bool TestM
-        {
-            get { return !TestP; }
-        }
-
-        #endregion
-
-        #region Construction
+        public bool TestM => !TestP;
 
         public Z80CPU(IBus16Bit memory, IBus16Bit io)
         {
@@ -431,7 +381,6 @@ namespace Morphic.Core.CPU.Z80
 
             op[0x36] = new Op("LD (HL),n", delegate
             {
-                var offset = 0;
                 if (indexerRegister != IndexerRegister.HL)
                 {
                     indexerOffset = (sbyte)Mem8(PC);
@@ -655,10 +604,6 @@ namespace Morphic.Core.CPU.Z80
             op[0xCD] = new Op("CALL nn", delegate { CALL(true, nn); });
         }
 
-        #endregion
-
-        #region Methods
-
         public void Cycle()
         {
             var opcode = Memory.ReadByte(PC);
@@ -690,7 +635,7 @@ namespace Morphic.Core.CPU.Z80
                 case InstructionSets.CB:
                     if (indexerRegister != IndexerRegister.HL)
                     {
-                        indexerOffset = (SByte) opcode;
+                        indexerOffset = (SByte)opcode;
                         opcode = n;
                     }
                     cycleOp = (opCB[opcode] ?? op[opcode]);
@@ -742,10 +687,6 @@ namespace Morphic.Core.CPU.Z80
             interruptMode = InterruptModes.IM0;
             IFF1 = IFF2 = false;
         }
-
-        #endregion
-
-        #region Memory subinstructions
 
         private UInt16 lastNat;
 
@@ -818,10 +759,6 @@ namespace Morphic.Core.CPU.Z80
         {
             PC += value;
         }
-
-        #endregion
-
-        #region Instructions
 
         protected void LD<T>(ref T to, T from)
         {
@@ -1192,19 +1129,16 @@ namespace Morphic.Core.CPU.Z80
             return r;
         }
 
-        #endregion
 
-        #region Flags
+        readonly byte[] hc_add = { 0, FlagMask.H, FlagMask.H, FlagMask.H, 0, 0, 0, FlagMask.H };
+        readonly byte[] hc_sub = { 0, 0, FlagMask.H, 0, FlagMask.H, 0, FlagMask.H, FlagMask.H };
 
-        private readonly byte[] hc_add = { 0, FlagMask.H, FlagMask.H, FlagMask.H, 0, 0, 0, FlagMask.H };
-        private readonly byte[] hc_sub = { 0, 0, FlagMask.H, 0, FlagMask.H, 0, FlagMask.H, FlagMask.H };
+        readonly byte[] ov_add = { 0, 0, 0, FlagMask.V, FlagMask.V, 0, 0, 0 };
+        readonly byte[] ov_sub = { 0, FlagMask.V, 0, 0, 0, 0, FlagMask.V, 0 };
 
-        private readonly byte[] ov_add = { 0, 0, 0, FlagMask.V, FlagMask.V, 0, 0, 0 };
-        private readonly byte[] ov_sub = { 0, FlagMask.V, 0, 0, 0, 0, FlagMask.V, 0 };
-
-        private readonly byte[] par = new byte[0x100]; // Parity of the lookup value
-        private readonly byte[] sz53 = new byte[0x100]; // S, Z, 5 and 3 bits of the lookup value
-        private readonly byte[] sz53p = new byte[0x100]; // OR the above two tables together
+        readonly byte[] par = new byte[0x100]; // Parity of the lookup value
+        readonly byte[] sz53 = new byte[0x100]; // S, Z, 5 and 3 bits of the lookup value
+        readonly byte[] sz53p = new byte[0x100]; // OR the above two tables together
 
         private void InitializeFlagTables()
         {
@@ -1228,8 +1162,6 @@ namespace Morphic.Core.CPU.Z80
             sz53[0] |= FlagMask.Z;
             sz53p[0] |= FlagMask.Z;
         }
-
-        #endregion
     }
 
     public class FlagMask

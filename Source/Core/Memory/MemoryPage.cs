@@ -2,29 +2,30 @@ using System;
 
 namespace Morphic.Core.Memory
 {
-	public class MemoryPage
-	{
-		private readonly Byte[] bytes;
-		public Boolean ReadOnly;
+    public class MemoryPage
+    {
+        readonly Byte[] bytes;
 
-		public MemoryPage(UInt32 size, Boolean readOnly)
-		{
-			bytes = new Byte[size];
-			ReadOnly = readOnly;
-		}
+        public Boolean ReadOnly;
 
-		public Byte this[Int32 address]
-		{
-			get { return bytes[address]; }
-			set { bytes[address] = value; }
-		}
+        public MemoryPage(UInt32 size, Boolean readOnly)
+        {
+            bytes = new Byte[size];
+            ReadOnly = readOnly;
+        }
 
-		public MemoryPage[] Create(UInt32 pageCount, UInt32 pageSize)
-		{
-			var pages = new MemoryPage[pageCount];
-			for(var idx = 0; idx < pageCount; idx++)
-				pages[idx] = new MemoryPage(pageSize, false);
-			return pages;
-		}
-	}
+        public Byte this[Int32 address]
+        {
+            get { return bytes[address]; }
+            set { bytes[address] = value; }
+        }
+
+        public MemoryPage[] Create(UInt32 pageCount, UInt32 pageSize)
+        {
+            var pages = new MemoryPage[pageCount];
+            for (var idx = 0; idx < pageCount; idx++)
+                pages[idx] = new MemoryPage(pageSize, false);
+            return pages;
+        }
+    }
 }

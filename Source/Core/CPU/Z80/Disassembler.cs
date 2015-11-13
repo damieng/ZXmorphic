@@ -6,11 +6,11 @@ namespace Morphic.Core.CPU.Z80
 {
     public class Disassembler
     {
-        private const String HexByte = "${0:X2}";
-        private const String HexWord = "${0:X4}";
+        const string HexByte = "${0:X2}";
+        const string HexWord = "${0:X4}";
 
-        private readonly Dictionary<UInt16, Block> disassembly = new Dictionary<UInt16, Block>();
-        private readonly Z80CPU z80;
+        readonly Dictionary<UInt16, Block> disassembly = new Dictionary<UInt16, Block>();
+        readonly Z80CPU z80;
 
         private ManipulateDecoded manipulateDecoded;
 
@@ -32,8 +32,8 @@ namespace Morphic.Core.CPU.Z80
                 var text = disassembly[address].Disassembly;
                 address += disassembly[address].Length;
 
-                // Stop debugging when out of range or an uncondition flow control change
-                if ((address > UInt16.MaxValue) || text == "JP" || text == "RET")
+                // Stop debugging when an uncondition flow control change
+                if (text == "JP" || text == "RET")
                     valid = false;
             }
 
@@ -64,9 +64,7 @@ namespace Morphic.Core.CPU.Z80
 
             if (text.Contains("x"))
             {
-                var x = (state.IndexerOffset.HasValue)
-                    ? state.IndexerOffset.Value
-                    : (SByte)z80.Memory.ReadByte(state.Address++);
+                var x = state.IndexerOffset ?? (SByte)z80.Memory.ReadByte(state.Address++);
                 text = text.Replace("x", x.ToString("+;-;") + String.Format(HexByte, x));
             }
 
@@ -95,25 +93,28 @@ namespace Morphic.Core.CPU.Z80
 
         private Z80CPU.Op DecodeOp(State state)
         {
-            var b = z80.Memory.ReadByte(state.Address++);
-            switch (b)
+            while (true)
             {
-                case 0xDD:
-                    manipulateDecoded = input => input.Replace("(HL)", "(IXx)").Replace("HL", "IX");
-                    state.IndexerRegister = Z80CPU.IndexerRegister.IX;
-                    return DecodeOp(state);
-                case 0xFD:
-                    manipulateDecoded = input => input.Replace("(HL)", "(IYx)").Replace("HL", "IY");
-                    state.IndexerRegister = Z80CPU.IndexerRegister.IY;
-                    return DecodeOp(state);
-                case 0xCB:
-                    if (state.IndexerRegister != Z80CPU.IndexerRegister.HL)
-                        state.IndexerOffset = (SByte)z80.Memory.ReadByte(state.Address++);
-                    return z80.opCB[z80.Memory.ReadByte(state.Address++)];
-                case 0xED:
-                    return z80.opED[z80.Memory.ReadByte(state.Address++)];
-                default:
-                    return z80.op[b];
+                var b = z80.Memory.ReadByte(state.Address++);
+                switch (b)
+                {
+                    case 0xDD:
+                        manipulateDecoded = input => input.Replace("(HL)", "(IXx)").Replace("HL", "IX");
+                        state.IndexerRegister = Z80CPU.IndexerRegister.IX;
+                        continue;
+                    case 0xFD:
+                        manipulateDecoded = input => input.Replace("(HL)", "(IYx)").Replace("HL", "IY");
+                        state.IndexerRegister = Z80CPU.IndexerRegister.IY;
+                        continue;
+                    case 0xCB:
+                        if (state.IndexerRegister != Z80CPU.IndexerRegister.HL)
+                            state.IndexerOffset = (SByte) z80.Memory.ReadByte(state.Address++);
+                        return z80.opCB[z80.Memory.ReadByte(state.Address++)];
+                    case 0xED:
+                        return z80.opED[z80.Memory.ReadByte(state.Address++)];
+                    default:
+                        return z80.op[b];
+                }
             }
         }
 
@@ -131,14 +132,14 @@ namespace Morphic.Core.CPU.Z80
             }
         }
 
-        private delegate string ManipulateDecoded(string input);
+        delegate string ManipulateDecoded(string input);
 
         private class State
         {
             public UInt16 Address;
             public SByte? IndexerOffset;
             public Z80CPU.IndexerRegister IndexerRegister = Z80CPU.IndexerRegister.HL;
-            public Z80CPU.InstructionSets instructionSet = Z80CPU.InstructionSets.Normal;
+            public Z80CPU.InstructionSets InstructionSet = Z80CPU.InstructionSets.Normal;
         }
     }
 }

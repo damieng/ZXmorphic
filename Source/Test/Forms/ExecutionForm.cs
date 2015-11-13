@@ -8,26 +8,12 @@ namespace Test.Forms
 {
     public partial class ExecutionForm : Form
     {
-        #region Constants & enumerations
-
         private const string AddressLineStart = "{0:X4}";
-
-        #endregion
-
-        #region Instance variables
 
         private readonly Z80CPU z80;
         private readonly Disassembler z80Disassembler;
         private Disassembler.Block currentBlock;
         private LEWord? lastPC;
-
-        #endregion
-
-        #region Properties
-
-        #endregion
-
-        #region Construction
 
         public ExecutionForm(Z80CPU z80)
         {
@@ -38,18 +24,10 @@ namespace Test.Forms
             RefreshDisplay();
         }
 
-        #endregion
-
-        #region Methods
-
         public void RefreshDisplay()
         {
             DisplayDisassembly();
         }
-
-        #endregion
-
-        #region Private functions
 
         private void DisplayDisassembly()
         {
@@ -62,7 +40,7 @@ namespace Test.Forms
 
             foreach (ListViewItem item in disassemblyListView.Items)
             {
-                var block = (Disassembler.Block) item.Tag;
+                var block = (Disassembler.Block)item.Tag;
                 if ((currPC >= block.Address) && (currPC <= block.Address + block.Length))
                 {
                     foundItem = item;
@@ -91,7 +69,7 @@ namespace Test.Forms
                 var item = new ListViewItem(string.Format(AddressLineStart, block.Address));
                 var bytes = "";
                 for (var i = 0; i < block.Length; i++)
-                    bytes += String.Format("{0:X2} ", z80.Memory.ReadByte((UInt16) (block.Address + i)));
+                    bytes += $"{z80.Memory.ReadByte((UInt16)(block.Address + i)):X2} ";
                 item.SubItems.Add(bytes.Trim());
                 item.SubItems.Add(block.Disassembly);
                 item.Tag = block;
@@ -107,8 +85,6 @@ namespace Test.Forms
 
             disassemblyListView.EndUpdate();
         }
-
-        #endregion
 
         private void RefreshTimer_Tick(object sender, EventArgs e)
         {
@@ -159,7 +135,7 @@ namespace Test.Forms
 
         private void RunToSelectedButton_Click(object sender, EventArgs e)
         {
-            var selectedBlock = (Disassembler.Block) disassemblyListView.SelectedItems[0].Tag;
+            var selectedBlock = (Disassembler.Block)disassemblyListView.SelectedItems[0].Tag;
             z80.StopBeforeAddress = selectedBlock.Address;
             z80.Step = false;
             Program.Resume();
@@ -167,7 +143,7 @@ namespace Test.Forms
 
         private void StepOverButton_Click(object sender, EventArgs e)
         {
-            z80.StopBeforeAddress = (ushort) (currentBlock.Address + currentBlock.Length);
+            z80.StopBeforeAddress = (ushort)(currentBlock.Address + currentBlock.Length);
             z80.Step = false;
             Program.Resume();
         }

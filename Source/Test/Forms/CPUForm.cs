@@ -25,7 +25,7 @@ namespace Test.Forms
         public void RefreshState()
         {
             SetValue(StatusListView, 0, z80.tStates.ToString());
-            SetValue(StatusListView, 1, String.Format("{0} {1} {2}", z80.InterruptMode, z80.IFF1, z80.IFF2));
+            SetValue(StatusListView, 1, $"{z80.InterruptMode} {z80.IFF1} {z80.IFF2}");
             SetValue(StatusListView, 2, z80.InstructionSet.ToString());
             SetValue(StatusListView, 3, z80.IndexerRegisterMode.ToString());
         }
@@ -50,7 +50,7 @@ namespace Test.Forms
             SetValue(CommonListView, 1, z80.IY.ToString());
             SetValue(CommonListView, 2, z80.PC.ToString());
             SetValue(CommonListView, 3, z80.SP.ToString());
-            SetValue(CommonListView, 4, String.Format("{0:X2} {1:X2}", z80.I, z80.R));
+            SetValue(CommonListView, 4, $"{z80.I:X2} {z80.R:X2}");
         }
 
         private void RefreshRegisters()
