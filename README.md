@@ -3,7 +3,7 @@ A personal experiment writing an emulator in C# - I chose the Sinclair ZX Spectr
 
 A few interesting things are using T4 to generate the bulk of the opcodes and the fully interactive debugger with breakpoints etc.
 
-Right now it only gets as far as the copyright message as interrupts and keyboard IO is not emulated.
+Right now it only gets as far as the copyright message as interrupts and keyboard IO are not emulated.
 
 It is several years old and has no test coverage as the whole thing is an experiment. 
 
