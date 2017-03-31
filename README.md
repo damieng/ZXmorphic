@@ -7,5 +7,4 @@ Right now it only gets as far as the copyright message as interrupts and keyboar
 
 It is several years old and has no test coverage as the whole thing is an experiment. 
 
-![Screenshot of Morphic with debugger]
-(https://lh3.googleusercontent.com/-xdbuqku3dwk/Ul4GewalktI/AAAAAAAABic/BMB987VBvJc/w1201-h935-no/Capture.PNG)
+![Screenshot of Morphic with debugger](https://lh3.googleusercontent.com/-xdbuqku3dwk/Ul4GewalktI/AAAAAAAABic/BMB987VBvJc/w1201-h935-no/Capture.PNG)
