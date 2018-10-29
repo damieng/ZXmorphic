@@ -16,21 +16,5 @@ namespace Test
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new MainForm());
         }
-
-        public static void Resume()
-        {
-            switch (EmulationThread.ThreadState)
-            {
-                case ThreadState.Unstarted:
-                    EmulationThread.Start();
-                    break;
-                case ThreadState.Suspended:
-                    EmulationThread.Resume();
-                    break;
-                case ThreadState.Running:
-                    EmulationThread.Suspend();
-                    break;
-            }
-        }
     }
 }

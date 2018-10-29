@@ -34,7 +34,7 @@ namespace Test.Forms
 
         private void toolStripComboBox2_SelectedIndexChanged(object sender, EventArgs e)
         {
-            switch (toolStripComboBox2.SelectedIndex)
+            switch (fitComboBox.SelectedIndex)
             {
                 case 1: pictureBox.SizeMode = PictureBoxSizeMode.StretchImage; break;
                 case 2: pictureBox.SizeMode = PictureBoxSizeMode.Zoom; break;

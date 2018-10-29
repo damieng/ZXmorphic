@@ -104,13 +104,13 @@ namespace Test.Forms
         private void RunButton_Click(object sender, EventArgs e)
         {
             z80.Step = false;
-            Program.Resume();
+            Program.EmulationThread.Resume();
         }
 
         private void StepButton_Click(object sender, EventArgs e)
         {
             z80.Step = true;
-            Program.Resume();
+            Program.EmulationThread.Resume();
         }
 
         private void BreakpointButton_Click(object sender, EventArgs e)
@@ -138,14 +138,14 @@ namespace Test.Forms
             var selectedBlock = (Disassembler.Block)disassemblyListView.SelectedItems[0].Tag;
             z80.StopBeforeAddress = selectedBlock.Address;
             z80.Step = false;
-            Program.Resume();
+            Program.EmulationThread.Resume();
         }
 
         private void StepOverButton_Click(object sender, EventArgs e)
         {
             z80.StopBeforeAddress = (ushort)(currentBlock.Address + currentBlock.Length);
             z80.Step = false;
-            Program.Resume();
+            Program.EmulationThread.Resume();
         }
     }
 }
