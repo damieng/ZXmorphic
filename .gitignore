@@ -17,6 +17,7 @@
 *.psess
 *.vsp
 *.vspx
+.vs/
 
 # ReSharper
 _ReSharper*/

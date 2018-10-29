@@ -18,6 +18,7 @@ namespace Test.Forms
             //machine.Cpu.Breakpoints.Add(0x128E, null);
 
             Program.EmulationThread = new Thread(machine.Run) { Name = "Emulation" };
+            Program.EmulationThread.Start();
         }
 
         protected override void OnLoad(EventArgs e)
@@ -86,11 +87,7 @@ namespace Test.Forms
         {
             if (Program.EmulationThread == null) return;
 
-            if (Program.EmulationThread.ThreadState == ThreadState.Suspended)
-                Program.EmulationThread.Resume();
-
-            if (Program.EmulationThread.ThreadState == ThreadState.Running)
-                Program.EmulationThread.Abort();
+            Program.EmulationThread.Abort();
         }
     }
 }
